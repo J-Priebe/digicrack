@@ -103,7 +103,8 @@ class LockGroup {
   isSolved(): boolean {
     for (const lock of this.locks) {
       for (const bit of lock) {
-        if (bit === 1) { // unallocated
+        if (bit === 1) {
+          // unallocated
           return false;
         }
       }
@@ -137,7 +138,7 @@ const solve = (keys: Key[], lockGroup: LockGroup): boolean => {
       }
     }
     if (lockGroup.isSolved()) {
-        return true;
+      return true;
     }
 
     // this allocation didn't solve it,
@@ -171,12 +172,6 @@ export const getSolution = (
   const filteredKeys = keys.filter(
     (key) => lockGroup.possibleKeyPositions(key).length > 0
   );
-
-  console.log(`Locks: ${lockArr}`);
-  console.log("Usable keys ordered by bits:");
-  for (const key of filteredKeys) {
-    console.log(key.toString());
-  }
 
   const solved = solve(filteredKeys, lockGroup);
 

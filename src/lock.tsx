@@ -1,4 +1,4 @@
-import React, { useState, FC } from "react";
+import { FC } from "react";
 
 // import './CircleButtons.css'; // Create a CSS file for styling
 
@@ -8,21 +8,14 @@ interface IRing {
   onBitToggle: (ringIndex: number, bitIndex: number) => void;
   ringNum: number;
   bits: Array<number>;
+  bitColors: Array<string>;
   xPos: number;
   yPos: number;
 }
 
 export const Ring: FC<IRing> = (props) => {
-  // const [slotStates, setSlotStates] = useState(
-  //   Array(props.numSegments).fill(0)
-  // );
-
-  // Step 4: Function to toggle the value of a button
   const toggleSlot = (index: number) => {
     props.onBitToggle(props.ringNum, index);
-    // const newButtonStates = [...slotStates];
-    // newButtonStates[index] = slotStates[index] === 0 ? 1 : 0;
-    // setSlotStates(newButtonStates);
   };
 
   const radius = props.circumference / (2 * Math.PI);
@@ -39,7 +32,7 @@ export const Ring: FC<IRing> = (props) => {
         cy={props.yPos}
         r={radius}
         fill="transparent"
-        stroke={s ? "red" : "blue"}
+        stroke={props.bitColors[i]}
         strokeWidth={strokeWidth}
         strokeDasharray={`${segmentLength} ${
           props.circumference - segmentLength
@@ -82,6 +75,7 @@ interface ILock {
   numRings: number;
   onBitToggle: (ringIndex: number, bitIndex: number) => void;
   lockBitArr: Array<Array<number>>;
+  lockColors: Array<Array<string>>;
 }
 
 export const LockRing: FC<ILock> = (props) => {
@@ -90,11 +84,12 @@ export const LockRing: FC<ILock> = (props) => {
   // const strokeWidths = [2,2,1.5,1.5,0.2];
   const iter = Array(props.numRings).fill(0);
   return (
-    <svg width="50%" height="100%" viewBox="0 0 42 42" className="donut">
+    <svg width="50%" height="100%" viewBox="0 0 42 100" className="donut">
       {iter.map((_, i) => {
         return (
           <Ring
             bits={props.lockBitArr[i]}
+            bitColors={props.lockColors[i]}
             numSegments={32}
             circumference={circumferences[i]}
             onBitToggle={props.onBitToggle}

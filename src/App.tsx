@@ -1,14 +1,33 @@
-import React, { useState, FC } from "react";
-import logo from "./logo.svg";
+import { useState} from "react";
 import { LockRing, Ring } from "./lock";
-import "./App.css";
 import { getSolution } from "./solver";
+import "./App.css";
 
 function App() {
   // track the locks here and pass in a click function
   // start with 3 rings
   const numBits = 32;
   // const [numRings, setNumRings] = useState(3);
+
+  // assign each key a color,
+  // so that when we apply a solution we color the locks
+  const colors = [
+    "red",
+    "darkgreen",
+    "darkred",
+    "orange",
+    "magenta",
+    "green",
+    "pink",
+    "yellow",
+    "blue",
+    "purple",
+    "darkorange",
+    "lightblue",
+    "violet",
+    "lightgreen",
+    "white",
+  ];
 
   // n rings of 32 bits each
   const [lockBits, setLockBits] = useState([
@@ -67,6 +86,21 @@ function App() {
     ],
   ]);
 
+  const unusedSlotColor = "gray";
+  const [keyColors, setKeyColors] = useState(
+    keyBits.map((bits, i) =>
+      bits.map((bit) => (bit === 1 ? colors[i] : unusedSlotColor))
+    )
+  );
+
+  const lockUsedSlotColor = "black";
+  // set all the lock bits to unused color to start
+  const [lockColors, setLockColors] = useState<Array<Array<any>>>(
+    lockBits.map((bits) =>
+      bits.map((bit) => (bit === 1 ? lockUsedSlotColor : unusedSlotColor))
+    )
+  );
+
   const numRings = (): number => {
     return lockBits?.length;
   };
@@ -80,23 +114,37 @@ function App() {
     setLockBits(newArr);
   };
   const toggleLockBit = (ringIndex: number, bitIndex: number) => {
-    const newState = lockBits.map((ring) => {
+    const newBits = lockBits.map((ring) => {
       return [...ring];
     });
-    const v = newState[ringIndex][bitIndex];
-    newState[ringIndex][bitIndex] = v === 1 ? 0 : 1;
+    const v = newBits[ringIndex][bitIndex];
+    newBits[ringIndex][bitIndex] = v === 1 ? 0 : 1;
 
-    setLockBits(newState);
+    const newColors = lockColors.map((ring) => {
+      return [...ring];
+    });
+    newColors[ringIndex][bitIndex] =
+      newBits[ringIndex][bitIndex] === 1 ? lockUsedSlotColor : unusedSlotColor;
+
+    setLockBits(newBits);
+    setLockColors(newColors);
   };
 
   const toggleKeyBit = (keyIndex: number, bitIndex: number) => {
-    const newState = keyBits.map((k) => {
+    const newBits = keyBits.map((k) => {
       return [...k];
     });
-    const v = newState[keyIndex][bitIndex];
-    newState[keyIndex][bitIndex] = v === 1 ? 0 : 1;
+    const v = newBits[keyIndex][bitIndex];
+    newBits[keyIndex][bitIndex] = v === 1 ? 0 : 1;
 
-    setKeyBits(newState);
+    const newColors = keyColors.map((key) => {
+      return [...key];
+    });
+    newColors[keyIndex][bitIndex] =
+      newBits[keyIndex][bitIndex] === 1 ? colors[keyIndex] : unusedSlotColor;
+
+    setKeyBits(newBits);
+    setKeyColors(newColors);
   };
 
   const numKeys = (): number => {
@@ -105,6 +153,7 @@ function App() {
 
   const addKey = () => {
     setKeyBits([...keyBits, Array(numBits).fill(0)]);
+    setKeyColors([...keyColors, Array(numBits).fill(unusedSlotColor)]);
   };
   const subKey = () => {
     const newArr = [...keyBits];
@@ -115,6 +164,12 @@ function App() {
   // TODO
   const keyRad = 35 / (2 * Math.PI);
   const keyXPos = [
+    keyRad + 1,
+    keyRad * 3 + 3,
+    keyRad * 5 + 5,
+    keyRad + 1,
+    keyRad * 3 + 3,
+    keyRad * 5 + 5,
     keyRad + 1,
     keyRad * 3 + 3,
     keyRad * 5 + 5,
@@ -135,39 +190,39 @@ function App() {
     keyRad * 5 + 5,
     keyRad * 5 + 5,
     keyRad * 5 + 5,
+    keyRad * 7 + 7,
+    keyRad * 7 + 7,
+    keyRad * 7 + 7,
+    keyRad * 9 + 9,
+    keyRad * 9 + 9,
+    keyRad * 9 + 9,
   ];
 
-  const colors = [
-    "#red", "#darkred",
-    "#orange", "#darkorange",
-    "#green",
-    "#darkgreen",
-    "#yellow",
-    "#blue", "#lightblue",
-    "#purple",
-  ]
-
   const doThing = () => {
-    const solution = getSolution(keyBits, lockBits)
-    console.log('SOLUTION:', JSON.stringify(solution))
+    const solution = getSolution(keyBits, lockBits);
+    // console.log("SOLUTION:", JSON.stringify(solution));
+    const newLockColors = lockColors.map((l) => [...l]);
     solution?.forEach((k) => {
       if (k.currentAllocation) {
         const [offset, lockIndex] = k.currentAllocation;
         const rotated = k.rotated(offset);
-        // keyBits[0] = 5;
+        // Set the lock bits to the color of the key that fills it.
+        // We use the ID of each key to map back to their
+        // original color and position, since we
+        // rearrange them before solving
+        rotated.forEach((r, i) => {
+          if (r === 1) {
+            newLockColors[lockIndex][i] = colors[k.id];
+          }
+        });
       }
-    })
-  }
+    });
+    setLockColors(newLockColors);
+  };
 
   return (
     <div className="App">
       <div>
-        <div>
-          Locks:
-          {lockBits.map((l, i) => (
-            <div key={i}>{JSON.stringify(l)}</div>
-          ))}
-        </div>
         <div>
           <button onClick={addRing} disabled={numRings() >= 5}>
             + Ring
@@ -175,12 +230,6 @@ function App() {
           <button onClick={subRing} disabled={numRings() <= 1}>
             - Ring
           </button>
-        </div>
-        <div>
-          Keys:
-          {keyBits.map((l, i) => (
-            <div key={i}>{JSON.stringify(l)}</div>
-          ))}
         </div>
         <div>
           <button onClick={addKey} disabled={numKeys() >= 15}>
@@ -199,12 +248,14 @@ function App() {
           numRings={numRings()}
           onBitToggle={toggleLockBit}
           lockBitArr={lockBits}
+          lockColors={lockColors}
         />
-        <svg width="50%" height="100%" viewBox="0 0 42 42" className="donut">
+        <svg width="50%" height="100%" viewBox="0 0 42 100" className="donut">
           {keyBits.map((k, i) => {
             return (
               <Ring
                 bits={keyBits[i]}
+                bitColors={keyColors[i]}
                 numSegments={32}
                 circumference={35}
                 onBitToggle={toggleKeyBit}
