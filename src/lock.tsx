@@ -1,7 +1,5 @@
 import { FC } from "react";
 
-// import './CircleButtons.css'; // Create a CSS file for styling
-
 interface IRing {
   circumference: number;
   numSegments: number;

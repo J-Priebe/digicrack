@@ -1,101 +1,32 @@
-import { useState} from "react";
+import { useEffect, useState } from "react";
 import { LockRing, Ring } from "./lock";
 import { getSolution } from "./solver";
+import { exampleKeys, exampleLocks, keyColors } from "./constants";
 import "./App.css";
 
 function App() {
-  // track the locks here and pass in a click function
-  // start with 3 rings
-  const numBits = 32;
-  // const [numRings, setNumRings] = useState(3);
+  const numBits = 32; // bits per key/lock
+  const maxKeys = 15;
+  const maxLocks = 5;
 
-  // assign each key a color,
-  // so that when we apply a solution we color the locks
-  const colors = [
-    "red",
-    "darkgreen",
-    "darkred",
-    "orange",
-    "magenta",
-    "green",
-    "pink",
-    "yellow",
-    "blue",
-    "purple",
-    "darkorange",
-    "lightblue",
-    "violet",
-    "lightgreen",
-    "white",
-  ];
-
-  // n rings of 32 bits each
-  const [lockBits, setLockBits] = useState([
-    // example lock
-    [
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 1, 0, 1,
-    ],
-    [
-      0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-      1, 0, 0, 0, 0, 0, 0,
-    ],
-    [
-      0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 1,
-    ],
-  ]);
-
-  const [keyBits, setKeyBits] = useState([
-    // example keys
-    [
-      0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 1, 0,
-    ],
-    [
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 1, 0, 0, 0, 0, 0,
-    ],
-    [
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0,
-    ],
-    [
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0,
-    ],
-    [
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0,
-    ],
-    [
-      0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0,
-      0, 1, 0, 0, 0, 0, 0,
-    ],
-    [
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 1,
-    ],
-    [
-      0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0,
-    ],
-    [
-      0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0,
-    ],
-  ]);
+  // positioning of Key SVG elements
+  const keySVGRadius = 35 / (2 * Math.PI);
+  const keysPerRow = 3;
 
   const unusedSlotColor = "gray";
-  const [keyColors, setKeyColors] = useState(
+  const lockUsedSlotColor = "black";
+
+  // n rings and keys, numBits each
+  const [lockBits, setLockBits] = useState(exampleLocks);
+  const [keyBits, setKeyBits] = useState(exampleKeys);
+
+  // set all the bits to unused color to start
+  const [keyBitColors, setKeyBitColors] = useState<Array<Array<string>>>(
     keyBits.map((bits, i) =>
-      bits.map((bit) => (bit === 1 ? colors[i] : unusedSlotColor))
+      bits.map((bit) => (bit === 1 ? keyColors[i] : unusedSlotColor))
     )
   );
-
-  const lockUsedSlotColor = "black";
-  // set all the lock bits to unused color to start
-  const [lockColors, setLockColors] = useState<Array<Array<any>>>(
+  const [lockColors, setLockColors] = useState<Array<Array<string>>>(
     lockBits.map((bits) =>
       bits.map((bit) => (bit === 1 ? lockUsedSlotColor : unusedSlotColor))
     )
@@ -104,15 +35,39 @@ function App() {
   const numRings = (): number => {
     return lockBits?.length;
   };
-
-  const addRing = () => {
+  const addLockRing = () => {
     setLockBits([...lockBits, Array(numBits).fill(0)]);
+    setLockColors([...lockColors, Array(numBits).fill(unusedSlotColor)]);
+    setIsSolved(null);
   };
-  const subRing = () => {
-    const newArr = [...lockBits];
-    newArr.pop();
-    setLockBits(newArr);
+  const subLockRing = () => {
+    const newLocks = [...lockBits];
+    newLocks.pop();
+    const newLockColors = [...lockColors];
+    newLockColors.pop();
+    setLockBits(newLocks);
+    setLockColors(newLockColors);
+    setIsSolved(null);
   };
+
+  const numKeys = (): number => {
+    return keyBits?.length;
+  };
+  const addKey = () => {
+    setKeyBits([...keyBits, Array(numBits).fill(0)]);
+    setKeyBitColors([...keyBitColors, Array(numBits).fill(unusedSlotColor)]);
+    setIsSolved(null);
+  };
+  const subKey = () => {
+    const newKeys = [...keyBits];
+    newKeys.pop();
+    const newColors = [...keyBitColors];
+    newColors.pop();
+    setKeyBits(newKeys);
+    setKeyBitColors(newColors);
+    setIsSolved(null);
+  };
+
   const toggleLockBit = (ringIndex: number, bitIndex: number) => {
     const newBits = lockBits.map((ring) => {
       return [...ring];
@@ -128,6 +83,7 @@ function App() {
 
     setLockBits(newBits);
     setLockColors(newColors);
+    setIsSolved(null);
   };
 
   const toggleKeyBit = (keyIndex: number, bitIndex: number) => {
@@ -137,70 +93,58 @@ function App() {
     const v = newBits[keyIndex][bitIndex];
     newBits[keyIndex][bitIndex] = v === 1 ? 0 : 1;
 
-    const newColors = keyColors.map((key) => {
+    const newColors = keyBitColors.map((key) => {
       return [...key];
     });
     newColors[keyIndex][bitIndex] =
-      newBits[keyIndex][bitIndex] === 1 ? colors[keyIndex] : unusedSlotColor;
+      newBits[keyIndex][bitIndex] === 1 ? keyColors[keyIndex] : unusedSlotColor;
 
     setKeyBits(newBits);
-    setKeyColors(newColors);
+    setKeyBitColors(newColors);
+    setIsSolved(null);
   };
 
-  const numKeys = (): number => {
-    return keyBits?.length;
+  const resetLockColors = () => {
+    const newColors = lockBits.map((lockRing) =>
+      lockRing.map((bit) => (bit !== 0 ? lockUsedSlotColor : unusedSlotColor))
+    );
+    setLockColors(newColors);
   };
 
-  const addKey = () => {
-    setKeyBits([...keyBits, Array(numBits).fill(0)]);
-    setKeyColors([...keyColors, Array(numBits).fill(unusedSlotColor)]);
-  };
-  const subKey = () => {
-    const newArr = [...keyBits];
-    newArr.pop();
-    setKeyBits(newArr);
+  const getKeyElementPosition = (i: number, width: number, radius: number) => {
+    const row = Math.floor(i / width);
+    const col = i % width;
+    const x = col * (2 * radius + 2) + radius + 1;
+    const y = row * (2 * radius + 2) + radius + 1;
+    return { x, y };
   };
 
-  // TODO
-  const keyRad = 35 / (2 * Math.PI);
-  const keyXPos = [
-    keyRad + 1,
-    keyRad * 3 + 3,
-    keyRad * 5 + 5,
-    keyRad + 1,
-    keyRad * 3 + 3,
-    keyRad * 5 + 5,
-    keyRad + 1,
-    keyRad * 3 + 3,
-    keyRad * 5 + 5,
-    keyRad + 1,
-    keyRad * 3 + 3,
-    keyRad * 5 + 5,
-    keyRad + 1,
-    keyRad * 3 + 3,
-    keyRad * 5 + 5,
-  ];
-  const keyYPos = [
-    keyRad + 1,
-    keyRad + 1,
-    keyRad + 1,
-    keyRad * 3 + 3,
-    keyRad * 3 + 3,
-    keyRad * 3 + 3,
-    keyRad * 5 + 5,
-    keyRad * 5 + 5,
-    keyRad * 5 + 5,
-    keyRad * 7 + 7,
-    keyRad * 7 + 7,
-    keyRad * 7 + 7,
-    keyRad * 9 + 9,
-    keyRad * 9 + 9,
-    keyRad * 9 + 9,
-  ];
+  const [isSolved, setIsSolved] = useState<boolean | null>(null);
 
-  const doThing = () => {
+  const [status, setStatus] = useState("Click Solve to begin!");
+
+  useEffect(() => {
+    if (isSolved === true) {
+      setStatus("Two is binding... we're in!");
+    } else if (isSolved === false) {
+      resetLockColors();
+      setStatus(
+        "This lock was too tough to crack :( Make sure your locks are keys are set up right, or report a bug to /u/POWERSNUGGLE on reddit :)"
+      );
+    } else {
+      resetLockColors();
+      setStatus('Set up your locks and keys, then hit "Solve"!');
+    }
+  }, [isSolved]);
+
+  const solve = () => {
     const solution = getSolution(keyBits, lockBits);
-    // console.log("SOLUTION:", JSON.stringify(solution));
+    if (solution) {
+      setIsSolved(true);
+    } else {
+      setIsSolved(false);
+    }
+
     const newLockColors = lockColors.map((l) => [...l]);
     solution?.forEach((k) => {
       if (k.currentAllocation) {
@@ -212,7 +156,7 @@ function App() {
         // rearrange them before solving
         rotated.forEach((r, i) => {
           if (r === 1) {
-            newLockColors[lockIndex][i] = colors[k.id];
+            newLockColors[lockIndex][i] = keyColors[k.id];
           }
         });
       }
@@ -224,15 +168,15 @@ function App() {
     <div className="App">
       <div>
         <div>
-          <button onClick={addRing} disabled={numRings() >= 5}>
-            + Ring
+          <button onClick={addLockRing} disabled={numRings() >= maxLocks}>
+            + Lock Ring
           </button>
-          <button onClick={subRing} disabled={numRings() <= 1}>
-            - Ring
+          <button onClick={subLockRing} disabled={numRings() <= 1}>
+            - Lock Ring
           </button>
         </div>
         <div>
-          <button onClick={addKey} disabled={numKeys() >= 15}>
+          <button onClick={addKey} disabled={numKeys() >= maxKeys}>
             + Key
           </button>
           <button onClick={subKey} disabled={numKeys() <= 1}>
@@ -240,8 +184,9 @@ function App() {
           </button>
         </div>
         <div>
-          <button onClick={doThing}>SOLVE</button>
+          <button onClick={solve}>SOLVE</button>
         </div>
+        <div>{status}</div>
       </div>
       <div>
         <LockRing
@@ -252,24 +197,23 @@ function App() {
         />
         <svg width="50%" height="100%" viewBox="0 0 42 100" className="donut">
           {keyBits.map((k, i) => {
+            const { x, y } = getKeyElementPosition(i, keysPerRow, keySVGRadius);
             return (
               <Ring
                 bits={keyBits[i]}
-                bitColors={keyColors[i]}
+                bitColors={keyBitColors[i]}
                 numSegments={32}
                 circumference={35}
                 onBitToggle={toggleKeyBit}
                 key={i}
                 ringNum={i}
-                xPos={keyXPos[i]}
-                yPos={keyYPos[i]}
+                xPos={x}
+                yPos={y}
               />
             );
           })}
         </svg>
       </div>
-      <div>Keys:</div>
-      <div></div>
     </div>
   );
 }

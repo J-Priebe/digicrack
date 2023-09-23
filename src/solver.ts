@@ -168,10 +168,11 @@ export const getSolution = (
     .map((k, i) => new Key(k, i))
     .sort((a, b) => b.bits! - a.bits!);
 
-  // Don't bother checking keys without any possible positions
-  const filteredKeys = keys.filter(
-    (key) => lockGroup.possibleKeyPositions(key).length > 0
-  );
+  // Don't bother checking keys without any possible positions,
+  // or completely empty keys
+  const filteredKeys = keys
+    .filter((key) => key.bits > 0)
+    .filter((key) => lockGroup.possibleKeyPositions(key).length > 0);
 
   const solved = solve(filteredKeys, lockGroup);
 
