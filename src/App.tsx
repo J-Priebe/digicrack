@@ -208,22 +208,48 @@ function App() {
       <Grid container spacing={2}>
         <Grid item xs={3} />
         <Grid item xs={6}>
-          <button onClick={addLockRing} disabled={numRings() >= maxLocks}>
+          <button
+            onClick={addLockRing}
+            disabled={
+              numRings() >= maxLocks || solveState === SOLVE_STATES.inProgress
+            }
+          >
             + Lock Ring
           </button>
-          <button onClick={subLockRing} disabled={numRings() <= 1}>
+          <button
+            onClick={subLockRing}
+            disabled={numRings() <= 1 || solveState === SOLVE_STATES.inProgress}
+          >
             - Lock Ring
           </button>
         </Grid>
         <Grid item xs={3}>
-          <button onClick={clearAll}>Clear All</button>{" "}
-          <button onClick={showExample}>Show Example</button>
+          <button
+            onClick={clearAll}
+            disabled={solveState === SOLVE_STATES.inProgress}
+          >
+            Clear All
+          </button>{" "}
+          <button
+            onClick={showExample}
+            disabled={solveState === SOLVE_STATES.inProgress}
+          >
+            Show Example
+          </button>
         </Grid>
         <Grid item xs={12}>
-          <button onClick={addKey} disabled={numKeys() >= maxKeys}>
+          <button
+            onClick={addKey}
+            disabled={
+              numKeys() >= maxKeys || solveState === SOLVE_STATES.inProgress
+            }
+          >
             + Key
           </button>
-          <button onClick={subKey} disabled={numKeys() <= 1}>
+          <button
+            onClick={subKey}
+            disabled={numKeys() <= 1 || solveState === SOLVE_STATES.inProgress}
+          >
             - Key
           </button>
           <Grid item xs={12}>

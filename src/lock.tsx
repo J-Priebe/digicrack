@@ -19,7 +19,7 @@ export const Ring: FC<IRing> = (props) => {
   };
 
   const radius = props.circumference / (2 * Math.PI);
-  const offset = 0.1;
+  const offset = 0.2;
   const segmentLength = props.circumference / props.bits.length - offset;
   const strokeWidth = 2.5;
 
@@ -37,7 +37,9 @@ export const Ring: FC<IRing> = (props) => {
           props.circumference - segmentLength
         }`}
         strokeDashoffset={
-          (i * props.circumference) / props.numSegments + offset
+          (i * props.circumference) / props.numSegments +
+          offset -
+          segmentLength / 2
         }
         onClick={() => toggleSlot(i)}
         key={i}

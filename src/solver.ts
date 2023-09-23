@@ -1,3 +1,5 @@
+let iterCount: number;
+
 const isMatch = (keyArr: number[], lockArr: number[]): boolean => {
   /*
     Return true if the index of every nonzero element in the key
@@ -23,18 +25,25 @@ class Key {
   baseKey: number[];
   currentAllocation: [number, number] | null = null;
   id: number;
+  rotatedCache: { [key: number]: Array<number> };
 
   constructor(arr: number[], id: number) {
     this.bits = arr.reduce((acc, val) => acc + val, 0);
     this.baseKey = [...arr];
     this.id = id;
+    this.rotatedCache = {};
   }
 
   rotated(offset: number): number[] {
+    // we hit this potentially millions of times, so cache it
+    if (this.rotatedCache[offset] !== undefined) {
+      return this.rotatedCache[offset];
+    }
     const newArray = [...this.baseKey];
     for (let i = 0; i < offset; i++) {
       newArray.push(newArray.shift() as number);
     }
+    this.rotatedCache[offset] = newArray;
     return newArray;
   }
 
@@ -114,7 +123,15 @@ class LockGroup {
 }
 
 const solve = (keys: Key[], lockGroup: LockGroup): boolean => {
+  iterCount += 1;
   if (keys.length === 0) {
+    return false;
+  }
+
+  // safety against massive depth complexity.. shouldn't hit
+  // this with any solvable locks
+  if (iterCount > 250000) {
+    console.log("Max iterations exceeded");
     return false;
   }
 
@@ -160,6 +177,7 @@ export const getSolution = (
   keyArr: number[][],
   lockArr: number[][]
 ): Key[] | null => {
+  iterCount = 0;
   const lockGroup = new LockGroup(lockArr);
 
   // Order our keys by highest-bits first,
@@ -175,6 +193,7 @@ export const getSolution = (
     .filter((key) => lockGroup.possibleKeyPositions(key).length > 0);
 
   const solved = solve(filteredKeys, lockGroup);
+  console.log("Iterations: ", iterCount);
 
   if (solved) {
     return keys;
