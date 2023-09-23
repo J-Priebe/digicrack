@@ -181,16 +181,43 @@ function App() {
     setLockColors(newLockColors);
   };
 
+  const clearAll = () => {
+    // empty all locks and keys, reset to two, one
+    setLockBits([Array(numBits).fill(0)]);
+    setLockColors([Array(numBits).fill(unusedSlotColor)]);
+    setKeyBits([Array(numBits).fill(0)]);
+    setKeyBitColors([Array(numBits).fill(unusedSlotColor)]);
+  };
+  const showExample = () => {
+    setLockBits(exampleLocks);
+    setLockColors(
+      exampleLocks.map((bits) =>
+        bits.map((bit) => (bit === 1 ? lockUsedSlotColor : unusedSlotColor))
+      )
+    );
+    setKeyBits(exampleKeys);
+    setKeyBitColors(
+      exampleKeys.map((bits, i) =>
+        bits.map((bit) => (bit === 1 ? keyColors[i] : unusedSlotColor))
+      )
+    );
+  };
+
   return (
     <div className="App">
       <Grid container spacing={2}>
-        <Grid item xs={12}>
+        <Grid item xs={3} />
+        <Grid item xs={6}>
           <button onClick={addLockRing} disabled={numRings() >= maxLocks}>
             + Lock Ring
           </button>
           <button onClick={subLockRing} disabled={numRings() <= 1}>
             - Lock Ring
           </button>
+        </Grid>
+        <Grid item xs={3}>
+          <button onClick={clearAll}>Clear All</button>{" "}
+          <button onClick={showExample}>Show Example</button>
         </Grid>
         <Grid item xs={12}>
           <button onClick={addKey} disabled={numKeys() >= maxKeys}>
