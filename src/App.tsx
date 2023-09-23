@@ -4,6 +4,13 @@ import { getSolution } from "./solver";
 import { exampleKeys, exampleLocks, keyColors } from "./constants";
 import "./App.css";
 
+enum SOLVE_STATES {
+  unsolved = 0,
+  solved = 1,
+  failed = 2,
+  inProgress = 3,
+}
+
 function App() {
   const numBits = 32; // bits per key/lock
   const maxKeys = 15;
@@ -38,7 +45,7 @@ function App() {
   const addLockRing = () => {
     setLockBits([...lockBits, Array(numBits).fill(0)]);
     setLockColors([...lockColors, Array(numBits).fill(unusedSlotColor)]);
-    setIsSolved(null);
+    setSolveState(SOLVE_STATES.unsolved);
   };
   const subLockRing = () => {
     const newLocks = [...lockBits];
@@ -47,7 +54,7 @@ function App() {
     newLockColors.pop();
     setLockBits(newLocks);
     setLockColors(newLockColors);
-    setIsSolved(null);
+    setSolveState(SOLVE_STATES.unsolved);
   };
 
   const numKeys = (): number => {
@@ -56,7 +63,7 @@ function App() {
   const addKey = () => {
     setKeyBits([...keyBits, Array(numBits).fill(0)]);
     setKeyBitColors([...keyBitColors, Array(numBits).fill(unusedSlotColor)]);
-    setIsSolved(null);
+    setSolveState(SOLVE_STATES.unsolved);
   };
   const subKey = () => {
     const newKeys = [...keyBits];
@@ -65,7 +72,7 @@ function App() {
     newColors.pop();
     setKeyBits(newKeys);
     setKeyBitColors(newColors);
-    setIsSolved(null);
+    setSolveState(SOLVE_STATES.unsolved);
   };
 
   const toggleLockBit = (ringIndex: number, bitIndex: number) => {
@@ -83,7 +90,7 @@ function App() {
 
     setLockBits(newBits);
     setLockColors(newColors);
-    setIsSolved(null);
+    setSolveState(SOLVE_STATES.unsolved);
   };
 
   const toggleKeyBit = (keyIndex: number, bitIndex: number) => {
@@ -101,7 +108,7 @@ function App() {
 
     setKeyBits(newBits);
     setKeyBitColors(newColors);
-    setIsSolved(null);
+    setSolveState(SOLVE_STATES.unsolved);
   };
 
   const resetLockColors = () => {
@@ -119,30 +126,35 @@ function App() {
     return { x, y };
   };
 
-  const [isSolved, setIsSolved] = useState<boolean | null>(null);
+  const [solveState, setSolveState] = useState<SOLVE_STATES>(
+    SOLVE_STATES.unsolved
+  );
 
   const [status, setStatus] = useState("Click Solve to begin!");
 
   useEffect(() => {
-    if (isSolved === true) {
+    if (solveState === SOLVE_STATES.solved) {
       setStatus("Two is binding... we're in!");
-    } else if (isSolved === false) {
+    } else if (solveState === SOLVE_STATES.failed) {
       resetLockColors();
       setStatus(
         "This lock was too tough to crack :( Make sure your locks are keys are set up right, or report a bug to /u/POWERSNUGGLE on reddit :)"
       );
-    } else {
+    } else if (solveState === SOLVE_STATES.unsolved) {
       resetLockColors();
       setStatus('Set up your locks and keys, then hit "Solve"!');
+    } else {
+      setStatus("Working on it... this is a tough one!");
     }
-  }, [isSolved]);
+  }, [solveState]);
 
   const solve = () => {
+    setSolveState(SOLVE_STATES.inProgress);
     const solution = getSolution(keyBits, lockBits);
     if (solution) {
-      setIsSolved(true);
+      setSolveState(SOLVE_STATES.solved);
     } else {
-      setIsSolved(false);
+      setSolveState(SOLVE_STATES.failed);
     }
 
     const newLockColors = lockColors.map((l) => [...l]);
@@ -184,7 +196,12 @@ function App() {
           </button>
         </div>
         <div>
-          <button onClick={solve}>SOLVE</button>
+          <button
+            onClick={solve}
+            disabled={solveState === SOLVE_STATES.inProgress}
+          >
+            SOLVE
+          </button>
         </div>
         <div>{status}</div>
       </div>

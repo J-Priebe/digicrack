@@ -19,8 +19,7 @@ export const Ring: FC<IRing> = (props) => {
   const radius = props.circumference / (2 * Math.PI);
   const offset = 0.1;
   const segmentLength = props.circumference / props.bits.length - offset;
-  // const offset = 0.15 * (circumference / 32);
-  const strokeWidth = 1.5; //strokeWidths[i];
+  const strokeWidth = 2;
 
   const segmentsSVG = props.bits.map((s, i) => {
     return (
@@ -29,7 +28,7 @@ export const Ring: FC<IRing> = (props) => {
         cx={props.xPos}
         cy={props.yPos}
         r={radius}
-        fill="transparent"
+        fill="none"
         stroke={props.bitColors[i]}
         strokeWidth={strokeWidth}
         strokeDasharray={`${segmentLength} ${
@@ -54,16 +53,6 @@ export const Ring: FC<IRing> = (props) => {
         r={radius - strokeWidth / 2}
         fill="lightgray"
       ></circle>
-      {/* <circle
-        className="donut-ring"
-        cx="21"
-        cy="21"
-        r={radius}
-        fill="transparent"
-        // stroke="#d2d3d4"
-        stroke="transparent"
-        strokeWidth={strokeWidth}
-      ></circle> */}
     </>
   );
 };
