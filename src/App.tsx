@@ -144,7 +144,12 @@ function App() {
       );
     } else if (solveState === SOLVE_STATES.unsolved) {
       resetLockColors();
-      setStatus('Set up your locks and keys, then hit "Solve"!');
+      setStatus(
+        `Tap the edges of the circles to create your locks and keys.
+        You can add/remove them with the controls above.
+        Then, hit SOLVE to see where each key fits in the lock!
+        You can show/hide the example at any time by using the buttons in the top corner.`
+      );
     } else {
       setStatus("Working on it... this is a tough one!");
     }
@@ -187,6 +192,7 @@ function App() {
     setLockColors([Array(numBits).fill(unusedSlotColor)]);
     setKeyBits([Array(numBits).fill(0)]);
     setKeyBitColors([Array(numBits).fill(unusedSlotColor)]);
+    setSolveState(SOLVE_STATES.unsolved);
   };
   const showExample = () => {
     setLockBits(exampleLocks);

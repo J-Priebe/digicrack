@@ -1,5 +1,6 @@
 let iterCount: number;
-
+// this is a pretty ridiculous number, but it seems we can handle it
+const MAX_ITERATIONS = 20000000;
 const isMatch = (keyArr: number[], lockArr: number[]): boolean => {
   /*
     Return true if the index of every nonzero element in the key
@@ -130,7 +131,7 @@ const solve = (keys: Key[], lockGroup: LockGroup): boolean => {
 
   // safety against massive depth complexity.. shouldn't hit
   // this with any solvable locks
-  if (iterCount > 250000) {
+  if (iterCount > MAX_ITERATIONS) {
     console.log("Max iterations exceeded");
     return false;
   }
