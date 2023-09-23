@@ -3,6 +3,7 @@ import { LockRing, Ring } from "./lock";
 import { getSolution } from "./solver";
 import { exampleKeys, exampleLocks, keyColors } from "./constants";
 import "./App.css";
+import Grid from "@mui/material/Grid";
 
 enum SOLVE_STATES {
   unsolved = 0,
@@ -17,7 +18,8 @@ function App() {
   const maxLocks = 5;
 
   // positioning of SVG elements
-  const keySVGRadius = 35 / (2 * Math.PI);
+  const keysSVGCircumference = 80;
+  const keySVGRadius = keysSVGCircumference / (2 * Math.PI);
   const keysPerRow = 3;
 
   const unusedSlotColor = "gray";
@@ -121,8 +123,8 @@ function App() {
   const getKeyElementPosition = (i: number, width: number, radius: number) => {
     const row = Math.floor(i / width);
     const col = i % width;
-    const x = col * (2 * radius + 2) + radius + 1;
-    const y = row * (2 * radius + 2) + radius + 1;
+    const x = col * (2 * radius + 5) + radius + 7;
+    const y = row * (2 * radius + 5) + radius + 1;
     return { x, y };
   };
 
@@ -150,6 +152,9 @@ function App() {
 
   const solve = () => {
     setSolveState(SOLVE_STATES.inProgress);
+    console.log('keys:', JSON.stringify(keyBits));
+    console.log('locks:', JSON.stringify(lockBits));
+
     const solution = getSolution(keyBits, lockBits);
     if (solution) {
       setSolveState(SOLVE_STATES.solved);
@@ -178,41 +183,43 @@ function App() {
 
   return (
     <div className="App">
-      <div>
-        <div>
+    <Grid container spacing={2}>
+        <Grid item xs={12}>
           <button onClick={addLockRing} disabled={numRings() >= maxLocks}>
             + Lock Ring
           </button>
           <button onClick={subLockRing} disabled={numRings() <= 1}>
             - Lock Ring
           </button>
-        </div>
-        <div>
+        </Grid>
+        <Grid item xs={12}>
           <button onClick={addKey} disabled={numKeys() >= maxKeys}>
             + Key
           </button>
           <button onClick={subKey} disabled={numKeys() <= 1}>
             - Key
           </button>
-        </div>
-        <div>
+          <Grid item xs={12}>
           <button
             onClick={solve}
             disabled={solveState === SOLVE_STATES.inProgress}
           >
             SOLVE
           </button>
-        </div>
-        <div>{status}</div>
-      </div>
-      <div>
+          </Grid>
+        </Grid>
+        <Grid item xs={12}>{status}</Grid>
+      <Grid item xs={12} lg={6}>
         <LockRing
           numRings={numRings()}
           onBitToggle={toggleLockBit}
           lockBitArr={lockBits}
           lockColors={lockColors}
         />
-        <svg width="50%" height="100%" viewBox="0 0 42 100" className="donut">
+      </Grid>
+      <Grid item xs={12} lg={6}>
+        <svg width="100%" height="100%" viewBox="0 0 100 200" className="keysSVG">
+        {/* <svg style = {{ width: "inherit", height:"inherit"}} > */}
           {keyBits.map((k, i) => {
             const { x, y } = getKeyElementPosition(i, keysPerRow, keySVGRadius);
             return (
@@ -220,7 +227,7 @@ function App() {
                 bits={keyBits[i]}
                 bitColors={keyBitColors[i]}
                 numSegments={32}
-                circumference={35}
+                circumference={keysSVGCircumference}
                 onBitToggle={toggleKeyBit}
                 key={i}
                 ringNum={i}
@@ -230,7 +237,8 @@ function App() {
             );
           })}
         </svg>
-      </div>
+      </Grid>
+      </Grid>
     </div>
   );
 }

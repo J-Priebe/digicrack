@@ -19,7 +19,7 @@ export const Ring: FC<IRing> = (props) => {
   const radius = props.circumference / (2 * Math.PI);
   const offset = 0.1;
   const segmentLength = props.circumference / props.bits.length - offset;
-  const strokeWidth = 2;
+  const strokeWidth = 2.5;
 
   const segmentsSVG = props.bits.map((s, i) => {
     return (
@@ -67,12 +67,17 @@ interface ILock {
 
 export const LockRing: FC<ILock> = (props) => {
   // circumference, stroke width for up to 5 rings
-  const circumferences = [100, 80, 60, 40, 20];
+  const circumferences = [300, 250, 200, 150, 100];
   // const strokeWidths = [2,2,1.5,1.5,0.2];
   const iter = Array(props.numRings).fill(0);
   return (
-    <svg width="50%" height="100%" viewBox="0 0 42 100" className="donut">
-      {iter.map((_, i) => {
+    <svg
+      width="100%"
+      height="100%"
+      viewBox="0 0 100 100"
+      className="locksSVG"
+    >
+    {iter.map((_, i) => {
         return (
           <Ring
             bits={props.lockBitArr[i]}
@@ -82,8 +87,8 @@ export const LockRing: FC<ILock> = (props) => {
             onBitToggle={props.onBitToggle}
             key={i}
             ringNum={i}
-            xPos={21}
-            yPos={21}
+            xPos={50}
+            yPos={50}
           />
         );
       })}
