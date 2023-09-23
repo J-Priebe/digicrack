@@ -16,7 +16,7 @@ function App() {
   const maxKeys = 15;
   const maxLocks = 5;
 
-  // positioning of Key SVG elements
+  // positioning of SVG elements
   const keySVGRadius = 35 / (2 * Math.PI);
   const keysPerRow = 3;
 
