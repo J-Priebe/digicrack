@@ -1,4 +1,6 @@
 import { FC } from "react";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 interface IRing {
   circumference: number;
@@ -70,14 +72,13 @@ export const LockRing: FC<ILock> = (props) => {
   const circumferences = [300, 250, 200, 150, 100];
   // const strokeWidths = [2,2,1.5,1.5,0.2];
   const iter = Array(props.numRings).fill(0);
+
+  const theme = useTheme();
+  const mdOrLarger = useMediaQuery(theme.breakpoints.up("md"));
+
   return (
-    <svg
-      width="100%"
-      height="100%"
-      viewBox="0 0 100 100"
-      className="locksSVG"
-    >
-    {iter.map((_, i) => {
+    <svg width="100%" height="100%" viewBox="0 0 100 100" className="locksSVG">
+      {iter.map((_, i) => {
         return (
           <Ring
             bits={props.lockBitArr[i]}
@@ -88,12 +89,10 @@ export const LockRing: FC<ILock> = (props) => {
             key={i}
             ringNum={i}
             xPos={50}
-            yPos={50}
+            yPos={mdOrLarger ? 0 : 50}
           />
         );
       })}
     </svg>
   );
 };
-
-// export default LockRing;

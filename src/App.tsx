@@ -152,8 +152,8 @@ function App() {
 
   const solve = () => {
     setSolveState(SOLVE_STATES.inProgress);
-    console.log('keys:', JSON.stringify(keyBits));
-    console.log('locks:', JSON.stringify(lockBits));
+    console.log("keys:", JSON.stringify(keyBits));
+    console.log("locks:", JSON.stringify(lockBits));
 
     const solution = getSolution(keyBits, lockBits);
     if (solution) {
@@ -183,7 +183,7 @@ function App() {
 
   return (
     <div className="App">
-    <Grid container spacing={2}>
+      <Grid container spacing={2}>
         <Grid item xs={12}>
           <button onClick={addLockRing} disabled={numRings() >= maxLocks}>
             + Lock Ring
@@ -200,44 +200,55 @@ function App() {
             - Key
           </button>
           <Grid item xs={12}>
-          <button
-            onClick={solve}
-            disabled={solveState === SOLVE_STATES.inProgress}
-          >
-            SOLVE
-          </button>
+            <button
+              onClick={solve}
+              disabled={solveState === SOLVE_STATES.inProgress}
+            >
+              SOLVE
+            </button>
           </Grid>
         </Grid>
-        <Grid item xs={12}>{status}</Grid>
-      <Grid item xs={12} lg={6}>
-        <LockRing
-          numRings={numRings()}
-          onBitToggle={toggleLockBit}
-          lockBitArr={lockBits}
-          lockColors={lockColors}
-        />
-      </Grid>
-      <Grid item xs={12} lg={6}>
-        <svg width="100%" height="100%" viewBox="0 0 100 200" className="keysSVG">
-        {/* <svg style = {{ width: "inherit", height:"inherit"}} > */}
-          {keyBits.map((k, i) => {
-            const { x, y } = getKeyElementPosition(i, keysPerRow, keySVGRadius);
-            return (
-              <Ring
-                bits={keyBits[i]}
-                bitColors={keyBitColors[i]}
-                numSegments={32}
-                circumference={keysSVGCircumference}
-                onBitToggle={toggleKeyBit}
-                key={i}
-                ringNum={i}
-                xPos={x}
-                yPos={y}
-              />
-            );
-          })}
-        </svg>
-      </Grid>
+        <Grid item xs={12}>
+          {status}
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <LockRing
+            numRings={numRings()}
+            onBitToggle={toggleLockBit}
+            lockBitArr={lockBits}
+            lockColors={lockColors}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <svg
+            width="100%"
+            height="100%"
+            viewBox="0 0 100 200"
+            className="keysSVG"
+          >
+            {/* <svg style = {{ width: "inherit", height:"inherit"}} > */}
+            {keyBits.map((k, i) => {
+              const { x, y } = getKeyElementPosition(
+                i,
+                keysPerRow,
+                keySVGRadius
+              );
+              return (
+                <Ring
+                  bits={keyBits[i]}
+                  bitColors={keyBitColors[i]}
+                  numSegments={32}
+                  circumference={keysSVGCircumference}
+                  onBitToggle={toggleKeyBit}
+                  key={i}
+                  ringNum={i}
+                  xPos={x}
+                  yPos={y}
+                />
+              );
+            })}
+          </svg>
+        </Grid>
       </Grid>
     </div>
   );
